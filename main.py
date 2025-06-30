@@ -72,3 +72,33 @@ def get_portfolio_summary():
             summary.append({"ticker": ticker, "error": str(e)})
 
     return {"summary": summary}
+    
+@app.get("/send-email")
+def send_email_report():
+    if not portfolio:
+        return {"message": "Portfolio is empty"}
+
+    summary = get_portfolio_summary()["summary"]
+
+    html = "<h3>📈 Daily Stock Summary</h3>"
+    html += "<table border='1' cellpadding='6' cellspacing='0'>"
+    html += "<tr><th>Ticker</th><th>Price</th><th>Change %</th></tr>"
+
+    for stock in summary:
+        html += f"<tr><td>{stock.get('ticker')}</td><td>{stock.get('price')}</td><td>{stock.get('change_percent')}</td></tr>"
+
+    html += "</table>"
+
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "📊 Daily Stock Portfolio Summary"
+    message["From"] = EMAIL_ADDRESS
+    message["To"] = TO_EMAIL
+    message.attach(MIMEText(html, "html"))
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+            server.sendmail(EMAIL_ADDRESS, TO_EMAIL, message.as_string())
+        return {"message": "Email sent successfully "}
+    except Exception as e:
+        return {"error": str(e)}
