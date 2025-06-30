@@ -5,6 +5,17 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import os
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or replace * with your frontend URL for safety
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 EMAIL_ADDRESS = os.environ["EMAIL_ADDRESS"]
 EMAIL_PASSWORD = os.environ["EMAIL_PASSWORD"]
